@@ -59,4 +59,7 @@ const generateRandomString = () => {
   return Math.random().toString(36).slice(6)
 }
 
-//console.log(generateRandomString())
+app.post('/urls/:shortURL/delete', (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+})
