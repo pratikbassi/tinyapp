@@ -10,18 +10,18 @@ const templateVars = {
   username: '',
 };
 
-const users = { 
+const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
-}
+};
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -29,7 +29,7 @@ const urlDatabase = {
 };
 
 app.get('/', (req, res) => {
-  res.redirect('/urls')
+  res.redirect('/urls');
 });
 
 app.listen(PORT, () => {
@@ -112,17 +112,26 @@ app.post('/logout', (req, res) => {
   res.clearCookie('username');
   templateVars.username = '';
   res.redirect('/urls');
-})
+});
 
 
-// app.post('/register', (req, res) => {
-//   let newId = generateRandomString
-//   users[newId] = {id:newId, email:req.body.email, password:req.body.password}
-//   console.log(req.body)
-//   res.redirect('/urls')
-// })
+app.post('/register', (req, res) => {
+  let newId = generateRandomString;
+  
+  console.log(req.body);
+  if (req.body.password !== req.body.password2) {
+    res.redirect('/regerror');
+  }
+
+  users[newId] = {id:newId, email:req.body.email, password:req.body.password};
+  res.redirect('/urls');
+});
 
 app.get('/register', (req, res) => {
+  //console.log('This is being called')
+  res.render('urls_reg', templateVars);
+});
 
-  res.render('/urls_reg', templateVars)
-})
+app.get('/regerror', (req, res) => {
+  res.render('urls_reg_error', templateVars);
+});
