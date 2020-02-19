@@ -22,10 +22,13 @@
       </a>
     <% } else if (!user) { %>
       <a>  
-        <form class="form-inline" method="POST" action="/login"> 
-          <input class='form-control' type='text' placeholder="email" name='email'></input>
-          <input class='form-control' type='text' placeholder="Password" name='password'></input>
-          <button class='btn btn-info' type='submit' value='login'>Login</button>
+        <form class="form-inline" method="GET" action="/login"> 
+          <button class='btn btn-info mr-2' type='submit' value='login'>Login</button>
+        </form>
+      </a>
+      <a>
+        <form class="form-inline" method="GET" action="/register"> 
+          <button class='btn btn-info' type='submit' value='login'>Register</button>
         </form>
       </a>
     <% } %>

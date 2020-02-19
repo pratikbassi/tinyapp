@@ -89,15 +89,11 @@ app.post("/urls", (req, res) => {
 });
 
 app.get('/u/:shortURL', (req, res) => {
-  //console.log(urlDatabase[req.params.shortURL]);
   res.redirect(urlDatabase[req.params.shortURL.slice(1)]);
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
-  //console.log('delete called')
-  //console.log(req.params.shortURL)
   delete urlDatabase[req.params.shortURL];
-  //console.log(urlDatabase)
   res.redirect('/urls');
 });
 
@@ -107,7 +103,6 @@ app.post('/urls/:shortURL/update', (req, res) => {
 });
 
 app.get('/urls/:shortURL/edit', (req, res) => {
-  //console.log(req.params.shortURL);
   res.redirect(`/urls/:${req.params.shortURL}`);
 });
 
@@ -117,25 +112,26 @@ app.post('/login', (req, res) => {
   let email = req.body.email;
   let userId = findUserId(email);
   if (!userId){
-    res.status(400).send({message: 'This email is not in our server!'});
+    res.status(403).send({message: 'This email is not in our server!'});
   }
   let password = users[userId]['password'];
   if (req.body.password !== password) {
-    res.status(400).send({message: 'Your password is not correct!'});
+    res.status(403).send({message: 'Your password is not correct!'});
   } 
   templateVars['user'] = users[userId]
-
+  res.cookie(userId);
   res.redirect('/urls');
+});
 
-  res.render("urls_index", templateVars);
-  res.render('urls_new', templateVars);
-  res.render('urls_show', templateVars);
-  res.render('urls_reg', templateVars);
-  res.render('urls_reg_error', templateVars);
+  
+
+app.get('/login', (req, res) => {
+  //console.log('This is being called')
+  res.render('login', templateVars);
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie(templateVars['user']['id']);
   templateVars.user = '';
   res.redirect('/urls');
 });
@@ -166,7 +162,6 @@ app.post('/register', (req, res) => {
 });
 
 app.get('/register', (req, res) => {
-  //console.log('This is being called')
   res.render('urls_reg', templateVars);
 });
 
