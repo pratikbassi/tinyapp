@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const PORT = 8080;
+const bcrypt = require('bcrypt')
 
 app.set('view engine', 'ejs');
 app.use(bodyParser.urlencoded({extended: true}));
@@ -10,12 +11,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "password"
+    password: bcrypt.hashSync('password', 10)
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "password"
+    password: bcrypt.hashSync('password', 10)
   }
 };
 
@@ -143,7 +144,7 @@ app.post('/login', (req, res) => {
     res.status(403).send({message: 'This email is not in our server!'});
   }
   let password = users[userId]['password'];
-  if (req.body.password !== password) {
+  if (!bcrypt.compareSync(req.body.password, password)) {
     res.status(403).send({message: 'Your password is not correct!'});
   } 
   templateVars['user'] = users[userId]
@@ -183,7 +184,13 @@ app.post('/register', (req, res) => {
     }
   }
   res.cookie('user_id', newId);
-  users[newId] = {id:newId, email:req.body.email, password:req.body.password};
+  users[newId] = {
+    id:newId, 
+    email:req.body.email, 
+    password:bcrypt.hashSync(req.body.password, 10)
+  };
+
+  console.log(users[newId]);
   templateVars['user'] = users[newId]
   res.redirect('/urls');
 });
