@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session')
+const {generateRandomString, findUserId, urlsForUser} = require('./helpers')
 
 const app = express();
 const PORT = 8080;
@@ -30,38 +31,7 @@ const urlDatabase = {
   "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID'}
 };
 //--------------------------------------------------------
-const generateRandomString = () => {
-  return Math.random().toString(36).slice(6);
-};
 
-const findUserId = (email, users) => {
-  let id = '';
-
-  for(let item in users){
-    if (users[item]['email'] === email){
-
-      return item;
-    }
-  }
-  
-  return id
-}
-
-const urlsForUser = (id) => {
-  let newUrls = {};
-  const templateVars = {
-    user: ''
-  };
-
-  templateVars['user'] = users[id]
-
-  for(let [key, value] of Object.entries(urlDatabase)){
-    if(value['userID'] === templateVars['user']['id']) {
-      newUrls[key] = value['longURL']
-    }
-  }
-  return newUrls
-}
 //----------------------------------------------------------
 app.set('trust proxy', 1);
 
@@ -102,7 +72,7 @@ app.get('/urls', (req, res) => {
     res.redirect('/login');
   }
   
-  templateVars['urls'] = urlsForUser(templateVars['user']['id']);
+  templateVars['urls'] = urlsForUser(templateVars['user']['id'], urlDatabase, users);
   res.render('urls_index', templateVars);
 });
 
@@ -126,7 +96,6 @@ app.get('/urls/:shortURL', (req, res) => {
   templateVars['user'] = users[req.session.userID]
 
   templateVars['shortURL'] = req.params.shortURL.slice(1);
-  console.log(templateVars);
 
   templateVars['longURL'] = urlDatabase[templateVars['shortURL']]['longURL'];
   res.render('urls_show', templateVars);
@@ -181,7 +150,6 @@ app.post('/login', (req, res) => {
   if (!bcrypt.compareSync(req.body.password, password)) {
     res.status(403).send({message: 'Your password is not correct!'});
   } 
-  //templateVars['user'] = users[userId]
   req.session.userID = userId;
   res.redirect('/urls');
 });
@@ -200,7 +168,6 @@ app.get('/login', (req, res) => {
 app.post('/logout', (req, res) => {
 
   req.session = null;
-  //templateVars.user = '';
   res.redirect('/urls');
 });
 
