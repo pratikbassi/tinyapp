@@ -10,12 +10,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "password"
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "password"
   }
 };
 
@@ -24,12 +24,11 @@ const templateVars = {
 };
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID:'userRandomID' },
+  "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID'}
 };
 //--------------------------------------------------------
 const generateRandomString = () => {
-
   return Math.random().toString(36).slice(6);
 };
 
@@ -44,6 +43,17 @@ const findUserId = (email) => {
   }
   
   return id
+}
+
+const urlsForUser = (id) => {
+  let newUrls = {};
+  for(let [key, value] of Object.entries(urlDatabase)){
+    if(value['userID'] === templateVars['user']['id']) {
+      let addobj = {};
+      newUrls[key] = value['longURL']
+    }
+  }
+  return newUrls
 }
 //----------------------------------------------------------
 
@@ -67,24 +77,33 @@ app.get('/hello', (req, res) => {
 //-----------------------------------------------------------
 
 app.get('/urls', (req, res) => {
-  templateVars['urls'] = urlDatabase;
+  if(!templateVars['user']) {
+    res.redirect('/login');
+  }
+  
+  templateVars['urls'] = urlsForUser(templateVars['user']['id']);
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
+  if (!templateVars['user']) {
+    res.redirect('/login')
+  }
   res.render('urls_new', templateVars);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
-  templateVars['shortURL'] = req.params.shortURL;
-  templateVars['longURL'] = urlDatabase[req.params.shortURL.slice(1)];
+  templateVars['shortURL'] = req.params.shortURL.slice(1);
+  templateVars['longURL'] = urlDatabase[templateVars['shortURL']]['longURL'];
   res.render('urls_show', templateVars);
 });
 
 app.post("/urls", (req, res) => {
-
+  if (!templateVars['user']) {
+    res.redirect('/login')
+  }
   let newString = generateRandomString();
-  urlDatabase[newString] = req.body['longURL'];
+  urlDatabase[newString] = {longURL:req.body['longURL'], userID: templateVars['user']['id']};
   res.redirect(`/urls/:${newString}`);
 });
 
@@ -93,16 +112,25 @@ app.get('/u/:shortURL', (req, res) => {
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
+  if (!templateVars['user']) {
+    res.redirect('/login')
+  }
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 });
 
 app.post('/urls/:shortURL/update', (req, res) => {
-  urlDatabase[req.params.shortURL.slice(1)] = req.body.fname;
+  if (!templateVars['user']) {
+    res.redirect('/login')
+  }
+  urlDatabase[templateVars['shortURL']]['longURL'] = req.body.fname;
   res.redirect('/urls');
 });
 
 app.get('/urls/:shortURL/edit', (req, res) => {
+  if (!templateVars['user']) {
+    res.redirect('/login')
+  }
   res.redirect(`/urls/:${req.params.shortURL}`);
 });
 
@@ -119,19 +147,18 @@ app.post('/login', (req, res) => {
     res.status(403).send({message: 'Your password is not correct!'});
   } 
   templateVars['user'] = users[userId]
-  res.cookie(userId);
+  res.cookie('user_id', userId);
   res.redirect('/urls');
 });
 
   
 
 app.get('/login', (req, res) => {
-  //console.log('This is being called')
   res.render('login', templateVars);
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie(templateVars['user']['id']);
+  res.clearCookie('user_id');
   templateVars.user = '';
   res.redirect('/urls');
 });
@@ -140,7 +167,6 @@ app.post('/logout', (req, res) => {
 app.post('/register', (req, res) => {
   let newId = generateRandomString;
   
-  console.log(req.body);
   if (!req.body.password || !req.body.email || !req.body.email) {
     res.status(400).send({
       message: 'One of the fields was blank!'
@@ -156,8 +182,9 @@ app.post('/register', (req, res) => {
       }
     }
   }
-
+  res.cookie('user_id', newId);
   users[newId] = {id:newId, email:req.body.email, password:req.body.password};
+  templateVars['user'] = users[newId]
   res.redirect('/urls');
 });
 
