@@ -4,7 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const cookieSession = require('cookie-session');
-const {generateRandomString, findUserId, urlsForUser} = require('./helpers');
+const {generateRandomString, findUserId, urlsForUser, giveDate, createTimestamp, calculateVisits} = require('./helpers');
 const methodOverride = require('method-override');
 
 //-------------------------------------------------APP SETUP
@@ -31,9 +31,21 @@ const users = {
 };
 
 const urlDatabase = {
-  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID:'userRandomID', clickCount:0},
-  "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID', clickCount:0}
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca", 
+    userID:'userRandomID', 
+    clickCount: 1,
+    visitList: [{'admin': giveDate()}]
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com", 
+    userID: 'user2RandomID', 
+    clickCount: 1,
+    visitList: [{'admin': giveDate()}]
+  }
 };
+
+let visitorCount = calculateVisits(urlDatabase);
 
 //---------------------------------------------------COOKIE ENCODER
 
@@ -103,7 +115,12 @@ app.post("/urls", (req, res) => {
     res.redirect('/login');
   }
   let newString = generateRandomString();
-  urlDatabase[newString] = {longURL:req.body['longURL'], userID: req.session.userID, clickCount:0};
+  urlDatabase[newString] = {
+    longURL:req.body['longURL'], 
+    userID: req.session.userID, 
+    clickCount: 1,
+    visitList: []
+    };
   res.redirect(`/urls/:${newString}`);
 });
 

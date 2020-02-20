@@ -1,8 +1,8 @@
-const generateRandomString = () => {
+const generateRandomString = () => { //Generates random string
   return Math.random().toString(36).slice(6);
 };
 
-const findUserId = (email, users) => {
+const findUserId = (email, users) => { //Finds a user ID by their email
   let id = '';
 
   for (let item in users) {
@@ -15,7 +15,7 @@ const findUserId = (email, users) => {
   return id;
 };
 
-const urlsForUser = (id, urlDatabase, users) => {
+const urlsForUser = (id, urlDatabase, users) => { //Finds the urls registered to a particular user
   let newUrls = {};
   const templateVars = {
     user: ''
@@ -31,5 +31,36 @@ const urlsForUser = (id, urlDatabase, users) => {
   return newUrls;
 };
 
+const giveDate = () => { //gives the date in the format YYYY/MM/DD+HH+MI+SS
+  let now = new Date();
+  let dd = String(now.getUTCDate());
+  let mm = String(now.getUTCMonth());
+  let yyyy = String(now.getUTCFullYear());
+  let hh = String(now.getUTCHours());
+  let mi = String(now.getUTCMinutes());
+  let ss = String(now.getUTCSeconds());
 
-module.exports = {generateRandomString, findUserId, urlsForUser};
+  
+  return (`UTC: ${yyyy}/${mm}/${dd}:${hh}/${mi}/${ss}`);
+}
+
+const createTimestamp = () => {
+  let newKey = generateRandomString()
+  let returnObj = {
+    newKey:giveDate()
+  }
+
+  return returnObj;
+}
+
+const calculateVisits = (urlDatabase) => {
+  let sum = 0;
+
+  for(let item in urlDatabase){
+    sum += item["clickCount"];
+  }
+
+  return sum;
+}
+
+module.exports = {generateRandomString, findUserId, urlsForUser, giveDate, createTimestamp, calculateVisits};
