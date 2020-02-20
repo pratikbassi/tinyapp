@@ -44,10 +44,9 @@ const giveDate = () => { //gives the date in the format YYYY/MM/DD+HH+MI+SS
   return (`UTC: ${yyyy}/${mm}/${dd}:${hh}/${mi}/${ss}`);
 }
 
-const createTimestamp = () => {
-  let newKey = generateRandomString()
+const createTimestamp = (id) => {
   let returnObj = {
-    newKey:giveDate()
+    id:giveDate()
   }
 
   return returnObj;

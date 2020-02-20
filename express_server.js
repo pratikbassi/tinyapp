@@ -35,17 +35,18 @@ const urlDatabase = {
     longURL: "http://www.lighthouselabs.ca", 
     userID:'userRandomID', 
     clickCount: 1,
-    visitList: [{'admin': giveDate()}]
+    visitList: {'admin': giveDate()}
   },
   "9sm5xK": {
     longURL: "http://www.google.com", 
     userID: 'user2RandomID', 
     clickCount: 1,
-    visitList: [{'admin': giveDate()}]
+    visitList: {'admin': giveDate()}
   }
 };
-
-let visitorCount = calculateVisits(urlDatabase);
+const analytics = {
+  totalVisitorCount: calculateVisits(urlDatabase),
+}
 
 //---------------------------------------------------COOKIE ENCODER
 
@@ -54,9 +55,12 @@ app.set('trust proxy', 1);
 app.use(cookieSession({
   name: 'session',
   keys: ['mocha', 'chai'],
+  userID: '',
 
   maxAge: 24 * 60 * 60 * 1000 // 24 hours
 }));
+
+
 //-------------------------------------------------REDIRECTS AND SERVER TESTS
 
 app.get('/', (req, res) => {
@@ -77,9 +81,10 @@ app.get('/urls', (req, res) => {
   templateVars['user'] = users[req.session.userID];
   if (!req.session.userID) {
     res.redirect('/login');
+  } else {
+    templateVars['urls'] = urlsForUser(req.session.userID, urlDatabase, users);
+    res.render('urls_index', templateVars);
   }
-  templateVars['urls'] = urlsForUser(req.session.userID, urlDatabase, users);
-  res.render('urls_index', templateVars);
 });
 
 app.get('/urls.json', (req, res) => {
@@ -145,16 +150,26 @@ app.get('/urls/:shortURL', (req, res) => {
   const templateVars = {
     user: ''
   };
-  if (!req.params.shortURL.slice(1)) {
+  if (!req.params.shortURL.slice(1) || !urlDatabase[req.params.shortURL.slice(1)]) {
     res.status(404).send('This short link does not exist! (404)');
     res.redirect('/urls')
   } else {
+    if (!req.session.id && !req.session.visitor) {
+      req.session.visitor = generateRandomString();
+      urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.visitor] = giveDate();
+    } else if (req.session.id && !urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.id]) {
+      urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.id] = giveDate();
+    } else if (req.session.visitor && !urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.visitor]) {
+      urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.visitor] = giveDate(); 
+    }
     templateVars['user'] = users[req.session.userID];
-    templateVars['shortURL'] = req.params.shortURL.slice(1);
+    templateVars['shortURL'] = req.params.shortURL.slice(1); 
     templateVars['longURL'] = urlDatabase[templateVars['shortURL']]['longURL'];
     templateVars['clickCount'] = urlDatabase[templateVars['shortURL']]['clickCount'];
+    templateVars['visitList'] = urlDatabase[templateVars['shortURL']]['visitList']
+    templateVars['uniques'] = Object.keys(templateVars['visitList']).length;
     urlDatabase[templateVars['shortURL']]['clickCount'] ++;
-  res.render('urls_show', templateVars);
+    res.render('urls_show', templateVars); 
   }
 });
 
@@ -246,7 +261,7 @@ app.post('/register', (req, res) => {
   };
 
   req.session.userID = users[newId]['id'];
-  console.log(req.session.userID);
+  //console.log(req.session.userID);
   res.redirect('/urls');
 });
 
