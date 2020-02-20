@@ -13,10 +13,11 @@
       <div class="card-body">
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">Short URL: <a href= <%= longURL %> ><%= shortURL %></a></p>
-        <form method="POST" action="/urls/<%=shortURL%>/update">
-          <input type ="text" name='fname'>
-          <button label='submit' type="submit" value="submit" class='btn btn-warning'>Update</input>
+        <form method="POST" action="/urls/<%=shortURL%>?_method=PUT">
+          <input type ="text" name='fname' required></input>
+          <button label='submit' type="submit" value="submit" class='btn btn-warning' style="margin-bottom: 5px;">Update</button>
         </form>
+        <h6 style="margin-top: 5px;">This link has been viewed: <%= clickCount %> times</h6>
       </div>
     <div class="card-footer text-muted"></div>
   </div>

@@ -31,8 +31,8 @@ const users = {
 };
 
 const urlDatabase = {
-  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID:'userRandomID' },
-  "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID'}
+  "b2xVn2": {longURL: "http://www.lighthouselabs.ca", userID:'userRandomID', clickCount:0},
+  "9sm5xK": {longURL: "http://www.google.com", userID: 'user2RandomID', clickCount:0}
 };
 
 //---------------------------------------------------COOKIE ENCODER
@@ -103,7 +103,7 @@ app.post("/urls", (req, res) => {
     res.redirect('/login');
   }
   let newString = generateRandomString();
-  urlDatabase[newString] = {longURL:req.body['longURL'], userID: req.session.userID};
+  urlDatabase[newString] = {longURL:req.body['longURL'], userID: req.session.userID, clickCount:0};
   res.redirect(`/urls/:${newString}`);
 });
 
@@ -135,6 +135,8 @@ app.get('/urls/:shortURL', (req, res) => {
     templateVars['user'] = users[req.session.userID];
     templateVars['shortURL'] = req.params.shortURL.slice(1);
     templateVars['longURL'] = urlDatabase[templateVars['shortURL']]['longURL'];
+    templateVars['clickCount'] = urlDatabase[templateVars['shortURL']]['clickCount'];
+    urlDatabase[templateVars['shortURL']]['clickCount'] ++;
   res.render('urls_show', templateVars);
   }
 });
@@ -144,7 +146,7 @@ app.post('/urls/:shortURL', (req, res) => {
   res.redirect('/urls/:shortURL/update');
 })
 
-app.post('/urls/:shortURL/delete', (req, res) => {
+app.delete('/urls/:shortURL', (req, res) => {
   if (!req.session.userID) {
     res.status(403).send('You are not logged in! (403)');
     res.redirect('/login');
@@ -156,7 +158,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   res.redirect('/urls');
 });
 
-app.post('/urls/:shortURL/update', (req, res) => {
+app.put('/urls/:shortURL', (req, res) => {
   if (!req.session.userID) {
     res.status(403).send('You are not logged in! (403)');
     res.redirect('/login');
@@ -196,7 +198,6 @@ app.get('/login', (req, res) => {
     templateVars['user'] = users[req.session.userID];
     res.render('login', templateVars);  
   }
-  
 });
 
 //-----------------------------------------------LOGOUT POST
