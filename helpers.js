@@ -5,15 +5,15 @@ const generateRandomString = () => {
 const findUserId = (email, users) => {
   let id = '';
 
-  for(let item in users){
-    if (users[item]['email'] === email){
+  for (let item in users) {
+    if (users[item]['email'] === email) {
 
       return item;
     }
   }
   
-  return id
-}
+  return id;
+};
 
 const urlsForUser = (id, urlDatabase, users) => {
   let newUrls = {};
@@ -21,15 +21,15 @@ const urlsForUser = (id, urlDatabase, users) => {
     user: ''
   };
 
-  templateVars['user'] = users[id]
+  templateVars['user'] = users[id];
 
-  for(let [key, value] of Object.entries(urlDatabase)){
-    if(value['userID'] === templateVars['user']['id']) {
-      newUrls[key] = value['longURL']
+  for (let [key, value] of Object.entries(urlDatabase)) {
+    if (value['userID'] === templateVars['user']['id']) {
+      newUrls[key] = value['longURL'];
     }
   }
-  return newUrls
-}
+  return newUrls;
+};
 
 
 module.exports = {generateRandomString, findUserId, urlsForUser};
