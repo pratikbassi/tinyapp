@@ -35,13 +35,15 @@ const urlDatabase = { //url database
     longURL: "http://www.lighthouselabs.ca", 
     userID:'userRandomID', 
     clickCount: 1,
-    visitList: {'admin': giveDate()}
+    visitList: {'admin': giveDate()},
+    createdOn: giveDate()
   },
   "9sm5xK": {
     longURL: "http://www.google.com", 
     userID: 'user2RandomID', 
     clickCount: 1,
-    visitList: {'admin': giveDate()}
+    visitList: {'admin': giveDate()},
+    createdOn: giveDate()
   }
 };
 
@@ -122,7 +124,8 @@ app.post("/urls", (req, res) => {
       longURL:req.body['longURL'], 
       userID: req.session.userID, 
       clickCount: 1,
-      visitList: []
+      visitList: [],
+      createdOn: giveDate()
       };
     res.redirect(`/urls/:${newString}`);
   }
@@ -162,14 +165,14 @@ app.get('/urls/:shortURL', (req, res) => {
       urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.visitor] = giveDate(); // adds the visitor to the shortURL's list
     }
     let input = req.params.shortURL.slice(1)
-    console.log(urlDatabase[input]['visitList'])
     templateVars = {
       'user': users[req.session.userID],//userdata for header
       'shortURL': input,//shortURL
       'longURL': urlDatabase[input]['longURL'],//longURL from database
       'clickCount': urlDatabase[input]['clickCount'],//total page loads
       'visitList': urlDatabase[input]['visitList'],//list of unique visitors
-      'uniques': Object.keys(urlDatabase[input]['visitList']).length //count of unique visitors
+      'uniques': Object.keys(urlDatabase[input]['visitList']).length, //count of unique visitors
+      'createdOn': urlDatabase[input]['createdOn']
     }
     //above code creates a templateVars object to display all the data for a specific shortURL
     urlDatabase[templateVars['shortURL']]['clickCount'] ++; //counts every non-unique visitor to the url
