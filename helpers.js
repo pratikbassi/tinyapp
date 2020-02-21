@@ -42,16 +42,27 @@ const giveDate = () => { //gives the date in the format YYYY/MM/DD+HH+MI+SS
 
   
   return (`UTC: ${yyyy}/${mm}/${dd} + ${hh}:${mi}:${ss}`);
-}
+};
 
-const calculateVisits = (urlDatabase) => {
-  let sum = 0;
 
-  for(let item in urlDatabase){
-    sum += item["clickCount"];
+const errorHandler = (code, text, req, res, users) => {
+  //experimental: created an error page for passwords that don't match each other and created this function to help with that
+  let templateVars = {
+    user: '',
+    code: code,
+    message: text
+  };
+  if (req.session.userID) {
+    templateVars = {
+      user: users[req.session.userID],
+    };
+  }
+  if (code !== 403 && code !== 400 && code !== 404) {
+    console.log(code, 'uh what');
+    res.send(`${code} + ${text}`);
   }
 
-  return sum;
-}
+  res.render('urls_reg_error', templateVars);
+};
 
-module.exports = {generateRandomString, findUserId, urlsForUser, giveDate, calculateVisits};
+module.exports = {generateRandomString, findUserId, urlsForUser, giveDate, errorHandler}

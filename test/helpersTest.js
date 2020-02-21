@@ -1,6 +1,6 @@
 const { assert, expect } = require('chai');
 
-const {generateRandomString, findUserId, urlsForUser, giveDate, calculateVisits} = require('../helpers.js');
+const {generateRandomString, findUserId, urlsForUser} = require('../helpers.js');
 
 const testUsers = {
   "userRandomID": {
