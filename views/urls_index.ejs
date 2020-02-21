@@ -22,21 +22,27 @@
         <tr>
           <th scope='col'>Short URL</th>
           <th scope='col'>Long URL</th>
+          <th scope='col'>Created On</th>
+          <th scope='col'>Unique Views</th>
+          <th scope='col'>Total Clicks</th>
           <th scope='col'>Delete</th>
           <th scope='col'>Edit</th>
         </tr>
       </thead>
       <tbody>
-        <% for(let url in urls) { %>
+        <% for(let key of keys) { %>
           <tr>
-            <td><%= url %></td>
-            <td><%= urls[url] %></td>
+            <td><%= key %></td>
+            <td><%= urls[key]['longURL'] %></td>
+            <td><%= urls[key]['createdOn'] %></td>
+            <td><%= Object.keys(urls[key]['visitList']).length %></td>
+            <td><%= urls[key]['clickCount'] %></td>
             <td>
-              <form method="POST" action="/urls/<%=url%>?_method=DELETE">
+              <form method="POST" action="/urls/<%=key%>?_method=DELETE">
                 <button type="submit" class='btn btn-danger'>Delete</button>
               </form>
             </td>
-            <td><form method="GET" action="/urls/<%=url%>/edit">
+            <td><form method="GET" action="/urls/<%=key%>/edit">
               <button type="submit" class='btn btn-warning'>Edit / View</button>
             </form></td>
           </tr>

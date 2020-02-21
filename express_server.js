@@ -75,14 +75,19 @@ app.listen(PORT, () => {
 //--------------------------------------------------LONGURL GETS
 
 app.get('/urls', (req, res) => {
-  const templateVars = {
+  let templateVars = {
     user: ''
   };
   templateVars['user'] = users[req.session.userID];
   if (!req.session.userID) { // checks login cookie
     errorHandler(403, 'You are not logged in', req, res )
   } else {
-    templateVars['urls'] = urlsForUser(req.session.userID, urlDatabase, users); // provides header and index page with data
+    
+    templateVars = {
+      'user': users[req.session.userID],//userdata for header
+      'urls': urlDatabase, //key value pairs for index
+      'keys': Object.keys(urlDatabase)
+    }// provides header and index page with data
     res.render('urls_index', templateVars);
   }
 });
