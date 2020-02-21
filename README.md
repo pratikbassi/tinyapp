@@ -10,6 +10,8 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 !["Reactive elements on main tinyURL page"](https://github.com/pratikbassi/tinyapp/blob/master/docs/Screen%20Shot%202020-02-20%20at%206.22.08%20PM.png)
 
+!["Reactive elements in fields"](https://github.com/pratikbassi/tinyapp/blob/master/docs/Screen%20Shot%202020-02-20%20at%206.40.22%20PM.png)
+
 ## Dependencies
 
 - Node.js
