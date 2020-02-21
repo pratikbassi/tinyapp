@@ -65,4 +65,4 @@ const errorHandler = (code, text, req, res, users) => {
   res.render('urls_reg_error', templateVars);
 };
 
-module.exports = {generateRandomString, findUserId, urlsForUser, giveDate, errorHandler}
+module.exports = {generateRandomString, findUserId, urlsForUser, giveDate, errorHandler};

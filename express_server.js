@@ -123,7 +123,7 @@ app.post("/urls", (req, res) => {
   if (!req.session.userID) {
     errorHandler(403, 'You are not logged in', req, res, users);
   } else { //generates a new entry into the url database
-    if(!req.body['longURL'].includes('http')){
+    if (!req.body['longURL'].includes('http')) {
       req.body['longURL'] = 'http://' + req.body['longURL'];
     }
     let newString = generateRandomString();
@@ -207,7 +207,7 @@ app.put('/urls/:shortURL', (req, res) => { //updates longurl in database
   }  else if (urlDatabase[req.params.shortURL]['userID'] !== req.session.userID) {
     errorHandler(403, 'You are not logged into the right account!', req, res, users);
   } else {
-    if(!req.body.fname.includes('http')){
+    if (!req.body.fname.includes('http')) {
       req.body.fname = 'http://' + req.body.fname;
     }
     urlDatabase[req.params.shortURL]['longURL'] = req.body.fname;
