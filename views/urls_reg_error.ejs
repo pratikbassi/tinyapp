@@ -11,7 +11,7 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
-        <h5 class="card-title"><%= message %></h5>
+        <h5 class="card-title"><%= message %> ( <%= code %> ) </h5>
         <% if (code === 403){%>  
           <form method="GET" action="/login">
           <% } else if (code === 404){%>  
