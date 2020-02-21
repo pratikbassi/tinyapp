@@ -80,7 +80,7 @@ app.get('/urls', (req, res) => {
   };
   templateVars['user'] = users[req.session.userID];
   if (!req.session.userID) { // checks login cookie
-    res.redirect('/login');
+    errorHandler(403, 'You are not logged in' )
   } else {
     templateVars['urls'] = urlsForUser(req.session.userID, urlDatabase, users); // provides header and index page with data
     res.render('urls_index', templateVars);
@@ -93,7 +93,7 @@ app.get('/urls.json', (req, res) => {
   };
   templateVars['user'] = users[req.session.userID];
   if (!req.session.userID) {
-    res.redirect('/login');
+    errorHandler(403, 'You are not logged in' )
   }
   templateVars['urls'] = urlsForUser(req.session.userID, urlDatabase, users);
   res.json(templateVars['urls']); //renders a JSON version of the urls
@@ -105,7 +105,7 @@ app.get('/urls/new', (req, res) => {
   };
   templateVars['user'] = users[req.session.userID];
   if (!templateVars['user']) {
-    res.redirect('/login');
+    errorHandler(403, 'You are not logged in' )
   }
   res.render('urls_new', templateVars); //renders the new URL page
 });
@@ -116,8 +116,7 @@ app.get('/urls/new', (req, res) => {
 app.post("/urls", (req, res) => {
   
   if (!req.session.userID) {
-    res.status(403).send('You are not logged in!');
-    res.redirect('/login'); 
+    errorHandler(403, 'You are not logged in' )
   } else{ //generates a new entry into the url database
     let newString = generateRandomString();
     urlDatabase[newString] = {
@@ -137,13 +136,13 @@ app.get('/u/:shortURL', (req, res) => {
   if(urlDatabase[req.params.shortURL.slice(1)]) {
     res.redirect(urlDatabase[req.params.shortURL.slice(1)]);
   } else {
-    res.status(404).send('This short link does not exist! (404)');
+    errorHandler(404, 'This link does not exist!' )
   } //redirects the browser to the long url link
 });
 
 app.get('/urls/:shortURL/edit', (req, res) => {
   if (!req.session.userID) {
-    res.redirect('/login');
+    errorHandler(403, 'You are not logged in' )
   }
   res.redirect(`/urls/:${req.params.shortURL}`);
 });//redirects the button on the index page to the edit page
@@ -153,8 +152,7 @@ app.get('/urls/:shortURL', (req, res) => {
     user: ''
   };
   if (!req.params.shortURL.slice(1) || !urlDatabase[req.params.shortURL.slice(1)]) {
-    res.status(404).send('This short link does not exist! (404)');
-    res.redirect('/urls')
+    errorHandler(404, 'This link cannot be found! Perhaps it doesn\'t exist?' )
   } else {
     if (!req.session.userID && !req.session.visitor) { // checks to see if the user has already accessed a short url or logged in
       req.session.visitor = generateRandomString(); //generates a visitor cookie for a new visitor
@@ -187,11 +185,9 @@ app.post('/urls/:shortURL', (req, res) => { //redirects to update page
 
 app.delete('/urls/:shortURL', (req, res) => { //deletes from url database
   if (!req.session.userID) {
-    res.status(403).send('You are not logged in! (403)');
-    res.redirect('/login');
+    errorHandler(403, 'You are not logged in' )
   }  else if (urlDatabase[req.params.shortURL]['userID'] !== req.session.userID) { 
-    res.status(403).send('You are not logged in to the right account! (403)');
-    res.redirect('/login');
+    errorHandler(403, 'You are not logged in to the right account!' )
   }
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
@@ -199,11 +195,9 @@ app.delete('/urls/:shortURL', (req, res) => { //deletes from url database
 
 app.put('/urls/:shortURL', (req, res) => { //updates longurl in database
   if (!req.session.userID) {
-    res.status(403).send('You are not logged in! (403)');
-    res.redirect('/login');
+    errorHandler(403, 'You are not logged in' )
   }  else if (urlDatabase[req.params.shortURL]['userID'] !== req.session.userID) { 
-    res.status(403).send('You are not logged in to the right account! (403)');
-    res.redirect('/login');
+    errorHandler(403, 'You are not logged into the right account!' )
   } else {
     urlDatabase[req.params.shortURL]['longURL'] = req.body.fname;
   }
@@ -216,11 +210,11 @@ app.post('/login', (req, res) => { //sends the login request
   let email = req.body.email;
   let userId = findUserId(email, users);
   if (!userId) {
-    res.status(403).send('This email is not in our server!(403)');
+    errorHandler(403, 'Your email is not correct!' )
   }
   let password = users[userId]['password'];
   if (!bcrypt.compareSync(req.body.password, password)) { //compares hashed password
-    res.status(403).send('Your password is not correct!(403)');
+    errorHandler(403, 'Your password is not correct!' )
   }
   req.session.userID = userId; //sets the encoded user cookie
   
@@ -253,12 +247,12 @@ app.post('/register', (req, res) => { //registers new user
   let newId = generateRandomString();
   
   if (!req.body.password || !req.body.email || !req.body.email) {
-    res.status(400).send('One of the fields was blank!(400)');
+    errorHandler(400, 'One of your fields was invalid!' )
   } else if (req.body.password !== req.body.password2) {
-    res.redirect('/regerror');
+    errorHandler(400, 'Your passwords do not match' )
   } else {
     if (findUserId(req.body.email, users)) {
-      res.status(400).send( 'Your email was already in the database!(400)');
+      errorHandler(400, 'Your email was already in the database!' )
     }
   }
   users[newId] = { //creates new user
@@ -282,11 +276,26 @@ app.get('/register', (req, res) => { //renders registration page
 
 //-----------------------------------------------REGISTER ERROR PAGE
 
-app.get('/regerror', (req, res) => { //experimental: created an error page for passwords that don't match each other
-  const templateVars = {
-    user: ''
-  };
 
-  templateVars['user'] = users[req.session.userID];
+const errorHandler = (code, text, goto) => {
+  app.get('/regerror', (req, res) => { //experimental: created an error page for passwords that don't match each other
+  const templateVars = {
+    user: '',
+    code: code,
+    text: text,
+    goto: goto
+  };
+  if (req.session.userID) {
+    templateVars = {
+      user: users[req.session.userID],
+    }
+  }
+  if (code !== 403 || code !== 400 || code !== 404 ){
+    res.send(`${code} + ${text} + ${goto}`)
+  } 
+
   res.render('urls_reg_error', templateVars);
 });
+}
+
+

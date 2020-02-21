@@ -11,6 +11,7 @@
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
+        <% if(user){ %>
         <h5 class="card-title">TinyURL for: <%= longURL %></h5>
         <p class="card-text">Short URL: <a href= <%= longURL %> ><%= shortURL %> created on  <%= createdOn %></a></p>
         <form method="POST" action="/urls/<%=shortURL%>?_method=PUT">
@@ -35,6 +36,10 @@
             <% } %>
           </tbody>
         </table>
+        <% } else { %>
+            <h5 class="card-title">TinyURL for: <%= longURL %></h5>
+            <p class="card-text">Short URL: <a href= <%= longURL %> ><%= shortURL %> </a></p>
+          <% } %>
       </div>
     <div class="card-footer text-muted"></div>
   </div>
