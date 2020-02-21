@@ -41,15 +41,7 @@ const giveDate = () => { //gives the date in the format YYYY/MM/DD+HH+MI+SS
   let ss = String(now.getUTCSeconds());
 
   
-  return (`UTC: ${yyyy}/${mm}/${dd}:${hh}/${mi}/${ss}`);
-}
-
-const createTimestamp = (id) => {
-  let returnObj = {
-    id:giveDate()
-  }
-
-  return returnObj;
+  return (`UTC: ${yyyy}/${mm}/${dd} + ${hh}:${mi}:${ss}`);
 }
 
 const calculateVisits = (urlDatabase) => {
@@ -62,4 +54,4 @@ const calculateVisits = (urlDatabase) => {
   return sum;
 }
 
-module.exports = {generateRandomString, findUserId, urlsForUser, giveDate, createTimestamp, calculateVisits};
+module.exports = {generateRandomString, findUserId, urlsForUser, giveDate, calculateVisits};

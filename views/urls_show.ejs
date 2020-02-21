@@ -19,6 +19,22 @@
         </form>
         <h6 style="margin-top: 5px;">This link has been viewed: <%= clickCount %> times</h6>
         <h6>  Unique Visitors: <%= uniques %></h6>
+        <table class='table table-hover' style="margin-top: 20px; align-content: center; align-self: center;">
+          <thead>
+            <tr>
+              <th scope="col"> Unique Visitor </th>
+              <th scope='col'> Time </th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for(let item in visitList){ %>
+              <tr>
+                <td> <%=item%> </td>
+                <td> <%=visitList[item]%> </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
       </div>
     <div class="card-footer text-muted"></div>
   </div>
