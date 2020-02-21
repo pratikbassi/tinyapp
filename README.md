@@ -8,7 +8,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 !["The new tinyURL page scaled"](https://github.com/pratikbassi/tinyapp/blob/master/docs/Screen%20Shot%202020-02-20%20at%206.24.43%20PM.png)
 
-!["The new tinyURL page scaled"](docs/Screen Shot 2020-02-20 at 6.22.08 PM.png)
+!["Reactive elements on main tinyURL page"](https://github.com/pratikbassi/tinyapp/blob/master/docs/Screen%20Shot%202020-02-20%20at%206.22.08%20PM.png)
 
 ## Dependencies
 
