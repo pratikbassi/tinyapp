@@ -80,7 +80,7 @@ app.get('/urls', (req, res) => {
   };
   templateVars['user'] = users[req.session.userID];
   if (!req.session.userID) { // checks login cookie
-    errorHandler(403, 'You are not logged in' )
+    errorHandler(403, 'You are not logged in', req, res )
   } else {
     templateVars['urls'] = urlsForUser(req.session.userID, urlDatabase, users); // provides header and index page with data
     res.render('urls_index', templateVars);
@@ -93,7 +93,7 @@ app.get('/urls.json', (req, res) => {
   };
   templateVars['user'] = users[req.session.userID];
   if (!req.session.userID) {
-    errorHandler(403, 'You are not logged in' )
+    errorHandler(403, 'You are not logged in', req, res)
   }
   templateVars['urls'] = urlsForUser(req.session.userID, urlDatabase, users);
   res.json(templateVars['urls']); //renders a JSON version of the urls
@@ -105,7 +105,7 @@ app.get('/urls/new', (req, res) => {
   };
   templateVars['user'] = users[req.session.userID];
   if (!templateVars['user']) {
-    errorHandler(403, 'You are not logged in' )
+    errorHandler(403, 'You are not logged in', req, res )
   }
   res.render('urls_new', templateVars); //renders the new URL page
 });
@@ -116,7 +116,7 @@ app.get('/urls/new', (req, res) => {
 app.post("/urls", (req, res) => {
   
   if (!req.session.userID) {
-    errorHandler(403, 'You are not logged in' )
+    errorHandler(403, 'You are not logged in', req, res)
   } else{ //generates a new entry into the url database
     let newString = generateRandomString();
     urlDatabase[newString] = {
@@ -136,13 +136,13 @@ app.get('/u/:shortURL', (req, res) => {
   if(urlDatabase[req.params.shortURL.slice(1)]) {
     res.redirect(urlDatabase[req.params.shortURL.slice(1)]);
   } else {
-    errorHandler(404, 'This link does not exist!' )
+    errorHandler(404, 'This link does not exist!', req, res )
   } //redirects the browser to the long url link
 });
 
 app.get('/urls/:shortURL/edit', (req, res) => {
   if (!req.session.userID) {
-    errorHandler(403, 'You are not logged in' )
+    errorHandler(403, 'You are not logged in', req, res )
   }
   res.redirect(`/urls/:${req.params.shortURL}`);
 });//redirects the button on the index page to the edit page
@@ -152,7 +152,7 @@ app.get('/urls/:shortURL', (req, res) => {
     user: ''
   };
   if (!req.params.shortURL.slice(1) || !urlDatabase[req.params.shortURL.slice(1)]) {
-    errorHandler(404, 'This link cannot be found! Perhaps it doesn\'t exist?' )
+    errorHandler(404, 'This link cannot be found! Perhaps it doesn\'t exist?', req, res )
   } else {
     if (!req.session.userID && !req.session.visitor) { // checks to see if the user has already accessed a short url or logged in
       req.session.visitor = generateRandomString(); //generates a visitor cookie for a new visitor
@@ -185,9 +185,9 @@ app.post('/urls/:shortURL', (req, res) => { //redirects to update page
 
 app.delete('/urls/:shortURL', (req, res) => { //deletes from url database
   if (!req.session.userID) {
-    errorHandler(403, 'You are not logged in' )
+    errorHandler(403, 'You are not logged in', req, res )
   }  else if (urlDatabase[req.params.shortURL]['userID'] !== req.session.userID) { 
-    errorHandler(403, 'You are not logged in to the right account!' )
+    errorHandler(403, 'You are not logged in to the right account!'  , req, res)
   }
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
@@ -195,9 +195,9 @@ app.delete('/urls/:shortURL', (req, res) => { //deletes from url database
 
 app.put('/urls/:shortURL', (req, res) => { //updates longurl in database
   if (!req.session.userID) {
-    errorHandler(403, 'You are not logged in' )
+    errorHandler(403, 'You are not logged in' , req, res)
   }  else if (urlDatabase[req.params.shortURL]['userID'] !== req.session.userID) { 
-    errorHandler(403, 'You are not logged into the right account!' )
+    errorHandler(403, 'You are not logged into the right account!', req, res)
   } else {
     urlDatabase[req.params.shortURL]['longURL'] = req.body.fname;
   }
@@ -210,11 +210,11 @@ app.post('/login', (req, res) => { //sends the login request
   let email = req.body.email;
   let userId = findUserId(email, users);
   if (!userId) {
-    errorHandler(403, 'Your email is not correct!' )
+    errorHandler(403, 'Your email is not correct!', req, res)
   }
   let password = users[userId]['password'];
   if (!bcrypt.compareSync(req.body.password, password)) { //compares hashed password
-    errorHandler(403, 'Your password is not correct!' )
+    errorHandler(403, 'Your password is not correct!' , req, res)
   }
   req.session.userID = userId; //sets the encoded user cookie
   
@@ -238,7 +238,7 @@ app.get('/login', (req, res) => { //renders login page
 app.post('/logout', (req, res) => { //deletes cookie and sends to logout
 
   req.session = null;
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 //-----------------------------------------------REGISTER POST/GET
@@ -247,12 +247,12 @@ app.post('/register', (req, res) => { //registers new user
   let newId = generateRandomString();
   
   if (!req.body.password || !req.body.email || !req.body.email) {
-    errorHandler(400, 'One of your fields was invalid!' )
+    errorHandler(400, 'One of your fields was invalid!', req, res)
   } else if (req.body.password !== req.body.password2) {
-    errorHandler(400, 'Your passwords do not match' )
+    errorHandler(400, 'Your passwords do not match', req, res)
   } else {
     if (findUserId(req.body.email, users)) {
-      errorHandler(400, 'Your email was already in the database!' )
+      errorHandler(400, 'Your email was already in the database!', req, res)
     }
   }
   users[newId] = { //creates new user
@@ -277,25 +277,24 @@ app.get('/register', (req, res) => { //renders registration page
 //-----------------------------------------------REGISTER ERROR PAGE
 
 
-const errorHandler = (code, text, goto) => {
-  app.get('/regerror', (req, res) => { //experimental: created an error page for passwords that don't match each other
+const errorHandler = (code, text, req, res) => {
+ //experimental: created an error page for passwords that don't match each other
   const templateVars = {
     user: '',
     code: code,
-    text: text,
-    goto: goto
+    message: text,
   };
   if (req.session.userID) {
     templateVars = {
       user: users[req.session.userID],
     }
   }
-  if (code !== 403 || code !== 400 || code !== 404 ){
-    res.send(`${code} + ${text} + ${goto}`)
+  if (code !== 403 && code !== 400 && code !== 404 ){
+    console.log(code, 'uh what')
+    res.send(`${code} + ${text}`)
   } 
 
   res.render('urls_reg_error', templateVars);
-});
 }
 
 
