@@ -141,8 +141,8 @@ app.post("/urls", (req, res) => {
 //---------------------------------------------SHORTURL GETS
 
 app.get('/u/:shortURL', (req, res) => {
-  if (urlDatabase[req.params.shortURL.slice(1)]) {
-    res.redirect(urlDatabase[req.params.shortURL.slice(1)]);
+  if (urlDatabase[req.params.shortURL.substring(1)]['longURL']) {
+    res.redirect(urlDatabase[req.params.shortURL.substring(1)]['longURL']);
   } else {
     errorHandler(404, 'This link does not exist!', req, res, users);
   } //redirects the browser to the long url link
@@ -159,18 +159,18 @@ app.get('/urls/:shortURL', (req, res) => {
   let templateVars = {
     user: ''
   };
-  if (!req.params.shortURL.slice(1) || !urlDatabase[req.params.shortURL.slice(1)]) {
+  if (!req.params.shortURL.substring(1) || !urlDatabase[req.params.shortURL.substring(1)]) {
     errorHandler(404, 'This link cannot be found! Perhaps it doesn\'t exist?', req, res, users);
   } else {
     if (!req.session.userID && !req.session.visitor) { // checks to see if the user has already accessed a short url or logged in
       req.session.visitor = generateRandomString(); //generates a visitor cookie for a new visitor
-      urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.visitor] = giveDate(); //adds the visitor to the shortURL's list
-    } else if (req.session.userID && !urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.userID]) { //checks to see if the user has seen this one
-      urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.userID] = giveDate(); //adds the user to the shortURL's list
-    } else if (req.session.visitor && !urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.visitor]) { //checks to see if the visitor has seen this one
-      urlDatabase[req.params.shortURL.slice(1)]['visitList'][req.session.visitor] = giveDate(); // adds the visitor to the shortURL's list
+      urlDatabase[req.params.shortURL.substring(1)]['visitList'][req.session.visitor] = giveDate(); //adds the visitor to the shortURL's list
+    } else if (req.session.userID && !urlDatabase[req.params.shortURL.substring(1)]['visitList'][req.session.userID]) { //checks to see if the user has seen this one
+      urlDatabase[req.params.shortURL.substring(1)]['visitList'][req.session.userID] = giveDate(); //adds the user to the shortURL's list
+    } else if (req.session.visitor && !urlDatabase[req.params.shortURL.substring(1)]['visitList'][req.session.visitor]) { //checks to see if the visitor has seen this one
+      urlDatabase[req.params.shortURL.substring(1)]['visitList'][req.session.visitor] = giveDate(); // adds the visitor to the shortURL's list
     }
-    let input = req.params.shortURL.slice(1);
+    let input = req.params.shortURL.substring(1);
     templateVars = {
       'user': users[req.session.userID],//userdata for header
       'shortURL': input,//shortURL
